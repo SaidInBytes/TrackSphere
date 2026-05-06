@@ -1,29 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
+import { StatusBadge, PriorityBadge } from './StatusBadge';
 import type { Report } from '../types/report';
 
 interface ReportTableProps {
   reports: Report[];
 }
-
-const STATUS_STYLE: Record<Report['status'], string> = {
-  open:          'bg-red-500/15 text-red-400 border border-red-500/30',
-  'in-progress': 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-  closed:        'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
-};
-
-const STATUS_LABEL: Record<Report['status'], string> = {
-  open: 'Open',
-  'in-progress': 'In Progress',
-  closed: 'Closed',
-};
-
-const PRIORITY_STYLE: Record<Report['priority'], string> = {
-  low:      'bg-gray-500/15 text-gray-400',
-  medium:   'bg-blue-500/15 text-blue-400',
-  high:     'bg-orange-500/15 text-orange-400',
-  critical: 'bg-red-600/20 text-red-400 font-semibold',
-};
 
 type SortKey = 'title' | 'category' | 'status' | 'location' | 'createdAt' | 'createdBy';
 type SortDir = 'asc' | 'desc';
@@ -55,6 +38,7 @@ function SortIcon({ active, dir }: SortIconProps) {
 }
 
 export function ReportTable({ reports }: ReportTableProps) {
+  const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
@@ -107,13 +91,12 @@ export function ReportTable({ reports }: ReportTableProps) {
             {sorted.map((r) => (
               <tr
                 key={r.id}
-                className="border-b border-[#2e3347] last:border-0 hover:bg-[#242736]/60 transition-colors"
+                onClick={() => navigate(`/reports/${r.id}`)}
+                className="border-b border-[#2e3347] last:border-0 hover:bg-[#242736]/60 transition-colors cursor-pointer"
               >
                 <td className="px-5 py-3.5 font-medium text-white max-w-[220px]">
                   <span className="truncate block">{r.title}</span>
-                  <span className={'inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] ' + PRIORITY_STYLE[r.priority]}>
-                    {r.priority.charAt(0).toUpperCase() + r.priority.slice(1)}
-                  </span>
+                  <PriorityBadge priority={r.priority} size="sm" />
                 </td>
                 <td className="px-5 py-3.5">
                   <span className="bg-[#242736] text-gray-300 px-2.5 py-1 rounded-lg text-xs">
@@ -121,9 +104,7 @@ export function ReportTable({ reports }: ReportTableProps) {
                   </span>
                 </td>
                 <td className="px-5 py-3.5">
-                  <span className={'px-2.5 py-1 rounded-full text-xs ' + STATUS_STYLE[r.status]}>
-                    {STATUS_LABEL[r.status]}
-                  </span>
+                  <StatusBadge status={r.status} size="sm" />
                 </td>
                 <td className="px-5 py-3.5 text-gray-400 whitespace-nowrap">
                   <span className="flex items-center gap-1">

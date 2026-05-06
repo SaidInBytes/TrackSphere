@@ -1,10 +1,17 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import { Dashboard } from './pages/Dashboard'
+import { ReportDetails } from './pages/ReportDetails'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Dashboard />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/reports/:id" element={<ReportDetails />} />
+      </Routes>
+    </BrowserRouter>
   </StrictMode>,
 )
