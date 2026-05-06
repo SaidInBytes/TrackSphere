@@ -13,34 +13,35 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const reportApi = {
-  getReports(): Promise<Report[]> {
-    return fetch(`${BASE_URL}/reports`).then((r) => handleResponse<Report[]>(r));
-  },
+export function getReports(): Promise<Report[]> {
+  return fetch(`${BASE_URL}/reports`).then((r) => handleResponse<Report[]>(r));
+}
 
-  getReportById(id: string): Promise<Report> {
-    return fetch(`${BASE_URL}/reports/${id}`).then((r) => handleResponse<Report>(r));
-  },
+export function getReportById(id: string): Promise<Report> {
+  return fetch(`${BASE_URL}/reports/${id}`).then((r) => handleResponse<Report>(r));
+}
 
-  createReport(payload: CreateReportPayload): Promise<Report> {
-    return fetch(`${BASE_URL}/reports`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).then((r) => handleResponse<Report>(r));
-  },
+export function createReport(payload: CreateReportPayload): Promise<Report> {
+  return fetch(`${BASE_URL}/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).then((r) => handleResponse<Report>(r));
+}
 
-  updateReport(id: string, payload: Partial<CreateReportPayload>): Promise<Report> {
-    return fetch(`${BASE_URL}/reports/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).then((r) => handleResponse<Report>(r));
-  },
+export function updateReport(id: string, payload: Partial<CreateReportPayload>): Promise<Report> {
+  return fetch(`${BASE_URL}/reports/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).then((r) => handleResponse<Report>(r));
+}
 
-  deleteReport(id: string): Promise<void> {
-    return fetch(`${BASE_URL}/reports/${id}`, {
-      method: 'DELETE',
-    }).then((r) => handleResponse<void>(r));
-  },
-};
+export function deleteReport(id: string): Promise<void> {
+  return fetch(`${BASE_URL}/reports/${id}`, {
+    method: 'DELETE',
+  }).then((r) => handleResponse<void>(r));
+}
+
+/** Convenience namespace (kept for backward compat) */
+export const reportApi = { getReports, getReportById, createReport, updateReport, deleteReport };

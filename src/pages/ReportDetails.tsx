@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -8,9 +9,11 @@ import {
   RefreshCw,
   FileText,
   AlertTriangle,
+  Loader2,
 } from 'lucide-react';
-import { getReports } from '../utils/reportStorage';
 import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
+import { getReportById } from '../services/reportApi';
+import type { Report } from '../types/report';
 
 function DetailRow({
   icon,
@@ -42,7 +45,7 @@ export function ReportDetails() {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    reportApi.getReportById(id)
+    getReportById(id)
       .then(setReport)
       .catch((err: Error) => setError(err.message ?? 'Report not found'))
       .finally(() => setLoading(false));

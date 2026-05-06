@@ -1,8 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ReportDetails } from '../../pages/ReportDetails';
-import * as storage from '../../utils/reportStorage';
+import * as reportApi from '../../services/reportApi';
 import type { Report } from '../../types/report';
 
 const REPORT: Report = {
@@ -31,44 +31,53 @@ function renderAt(path: string) {
 
 describe('ReportDetails', () => {
   beforeEach(() => {
-    vi.spyOn(storage, 'getReports').mockReturnValue([REPORT]);
+    vi.spyOn(reportApi, 'getReportById').mockResolvedValue(REPORT);
   });
 
-  it('renders title', () => {
+  it('renders title', async () => {
     renderAt('/reports/42');
-    // title appears in both the nav breadcrumb and the h1
-    expect(screen.getAllByText('Test report title').length).toBeGreaterThan(0);
+    await waitFor(() =>
+      expect(screen.getAllByText('Test report title').length).toBeGreaterThan(0),
+    );
   });
-  it('renders description', () => {
+  it('renders description', async () => {
     renderAt('/reports/42');
-    expect(screen.getByText('This is a test description.')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByText('This is a test description.')).toBeInTheDocument(),
+    );
   });
-  it('renders category', () => {
+  it('renders category', async () => {
     renderAt('/reports/42');
-    expect(screen.getByText('Bug')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Bug')).toBeInTheDocument());
   });
-  it('renders location', () => {
+  it('renders location', async () => {
     renderAt('/reports/42');
-    expect(screen.getByText('Stockholm')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Stockholm')).toBeInTheDocument());
   });
-  it('renders reporter', () => {
+  it('renders reporter', async () => {
     renderAt('/reports/42');
-    expect(screen.getByText('Alice')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument());
   });
-  it('renders status badge', () => {
+  it('renders status badge', async () => {
     renderAt('/reports/42');
-    expect(screen.getAllByText('Open').length).toBeGreaterThan(0);
+    await waitFor(() =>
+      expect(screen.getAllByText('Open').length).toBeGreaterThan(0),
+    );
   });
-  it('renders back button', () => {
+  it('renders back button', async () => {
     renderAt('/reports/42');
-    expect(screen.getByText('Back')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Back')).toBeInTheDocument());
   });
-  it('shows not-found state for unknown id', () => {
+  it('shows not-found state for unknown id', async () => {
+    vi.spyOn(reportApi, 'getReportById').mockRejectedValue(new Error('Not found'));
     renderAt('/reports/999');
-    expect(screen.getByText('Report not found')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByText('Report not found')).toBeInTheDocument(),
+    );
   });
-  it('shows missing id in not-found message', () => {
+  it('shows error message for unknown id', async () => {
+    vi.spyOn(reportApi, 'getReportById').mockRejectedValue(new Error('Not found'));
     renderAt('/reports/999');
-    expect(screen.getByText(/999/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Not found')).toBeInTheDocument());
   });
 });
