@@ -1,150 +1,150 @@
 import { useState } from 'react';
+import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
 import type { Report } from '../types/report';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface ReportTableProps {
   reports: Report[];
 }
 
-// Badge styling per status value
-const statusStyles: Record<Report['status'], string> = {
-  open: 'bg-red-500/20 text-red-400',
-  'in-progress': 'bg-yellow-500/20 text-yellow-400',
-  closed: 'bg-green-500/20 text-green-400',
+const STATUS_STYLE: Record<Report['status'], string> = {
+  open:          'bg-red-500/15 text-red-400 border border-red-500/30',
+  'in-progress': 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+  closed:        'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
 };
 
-const statusLabels: Record<Report['status'], string> = {
-  open: 'Öppen',
-  'in-progress': 'Pågående',
-  closed: 'Stängd',
+const STATUS_LABEL: Record<Report['status'], string> = {
+  open: 'Open',
+  'in-progress': 'In Progress',
+  closed: 'Closed',
 };
 
-// Badge styling per priority
-const priorityStyles: Record<Report['priority'], string> = {
-  low: 'bg-gray-500/20 text-gray-400',
-  medium: 'bg-blue-500/20 text-blue-400',
-  high: 'bg-orange-500/20 text-orange-400',
-  critical: 'bg-red-600/30 text-red-400 font-semibold',
+const PRIORITY_STYLE: Record<Report['priority'], string> = {
+  low:      'bg-gray-500/15 text-gray-400',
+  medium:   'bg-blue-500/15 text-blue-400',
+  high:     'bg-orange-500/15 text-orange-400',
+  critical: 'bg-red-600/20 text-red-400 font-semibold',
 };
 
-const priorityLabels: Record<Report['priority'], string> = {
-  low: 'Låg',
-  medium: 'Medium',
-  high: 'Hög',
-  critical: 'Kritisk',
-};
-
-type SortKey = 'createdAt' | 'priority' | 'status' | 'title';
+type SortKey = 'title' | 'category' | 'status' | 'location' | 'createdAt' | 'createdBy';
 type SortDir = 'asc' | 'desc';
 
-const PRIORITY_ORDER: Record<Report['priority'], number> = {
-  critical: 4,
-  high: 3,
-  medium: 2,
-  low: 1,
+const PRIORITY_RANK: Record<Report['priority'], number> = {
+  critical: 4, high: 3, medium: 2, low: 1,
 };
+
+function sortReports(list: Report[], key: SortKey, dir: SortDir): Report[] {
+  return [...list].sort((a, b) => {
+    let cmp = 0;
+    if (key === 'createdAt') {
+      cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    } else if (key === 'status') {
+      cmp = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+    } else {
+      cmp = (a[key] as string).localeCompare(b[key] as string);
+    }
+    return dir === 'asc' ? cmp : -cmp;
+  });
+}
+
+interface SortIconProps { active: boolean; dir: SortDir }
+function SortIcon({ active, dir }: SortIconProps) {
+  if (!active) return <ChevronDown size={13} className="ml-1 opacity-20 inline" />;
+  return dir === 'asc'
+    ? <ChevronUp size={13} className="ml-1 text-indigo-400 inline" />
+    : <ChevronDown size={13} className="ml-1 text-indigo-400 inline" />;
+}
 
 export function ReportTable({ reports }: ReportTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
-  // Toggle sort direction or switch sort key
-  const handleSort = (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortKey(key);
-      setSortDir('asc');
-    }
+  const toggleSort = (key: SortKey) => {
+    if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortKey(key); setSortDir('asc'); }
   };
 
-  const sorted = [...reports].sort((a, b) => {
-    let cmp = 0;
-    if (sortKey === 'createdAt') {
-      cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    } else if (sortKey === 'priority') {
-      cmp = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
-    } else if (sortKey === 'status') {
-      cmp = a.status.localeCompare(b.status);
-    } else if (sortKey === 'title') {
-      cmp = a.title.localeCompare(b.title);
-    }
-    return sortDir === 'asc' ? cmp : -cmp;
-  });
+  const sorted = sortReports(reports, sortKey, sortDir);
 
-  const SortIcon = ({ col }: { col: SortKey }) =>
-    sortKey === col ? (
-      sortDir === 'asc' ? (
-        <ChevronUp size={14} className="inline ml-1" />
-      ) : (
-        <ChevronDown size={14} className="inline ml-1" />
-      )
-    ) : (
-      <ChevronDown size={14} className="inline ml-1 opacity-20" />
-    );
+  const columns: { label: string; key: SortKey | null }[] = [
+    { label: 'Title',    key: 'title' },
+    { label: 'Category', key: 'category' },
+    { label: 'Status',   key: 'status' },
+    { label: 'Location', key: 'location' },
+    { label: 'Date',     key: 'createdAt' },
+    { label: 'Reporter', key: 'createdBy' },
+  ];
 
   if (reports.length === 0) {
     return (
-      <div className="bg-dark-800 rounded-2xl p-8 border border-dark-700 text-center text-gray-500">
-        Inga rapporter matchar dina filter.
+      <div className="bg-[#1a1d27] rounded-2xl p-10 border border-[#2e3347] text-center text-gray-500 text-sm">
+        No reports match the current filters.
       </div>
     );
   }
 
   return (
-    <div className="bg-dark-800 rounded-2xl border border-dark-700 shadow-lg overflow-x-auto">
-      <table className="w-full text-sm text-left">
-        <thead>
-          <tr className="border-b border-dark-700 text-gray-400">
-            {(
-              [
-                { label: 'Titel', key: 'title' },
-                { label: 'Status', key: 'status' },
-                { label: 'Prioritet', key: 'priority' },
-                { label: 'Kategori', key: null },
-                { label: 'Skapad av', key: null },
-                { label: 'Datum', key: 'createdAt' },
-              ] as { label: string; key: SortKey | null }[]
-            ).map(({ label, key }) => (
-              <th
-                key={label}
-                className={`px-5 py-4 font-medium ${key ? 'cursor-pointer select-none hover:text-white transition-colors' : ''}`}
-                onClick={key ? () => handleSort(key) : undefined}
-              >
-                {label}
-                {key && <SortIcon col={key} />}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((report) => (
-            <tr
-              key={report.id}
-              className="border-b border-dark-700 last:border-0 hover:bg-dark-700/50 transition-colors"
-            >
-              <td className="px-5 py-3.5 text-white font-medium max-w-[240px]">
-                <span className="truncate block">{report.title}</span>
-              </td>
-              <td className="px-5 py-3.5">
-                <span className={`px-2.5 py-1 rounded-full text-xs ${statusStyles[report.status]}`}>
-                  {statusLabels[report.status]}
-                </span>
-              </td>
-              <td className="px-5 py-3.5">
-                <span className={`px-2.5 py-1 rounded-full text-xs ${priorityStyles[report.priority]}`}>
-                  {priorityLabels[report.priority]}
-                </span>
-              </td>
-              <td className="px-5 py-3.5 text-gray-400">{report.category}</td>
-              <td className="px-5 py-3.5 text-gray-400">{report.createdBy}</td>
-              <td className="px-5 py-3.5 text-gray-400 whitespace-nowrap">
-                {new Date(report.createdAt).toLocaleDateString('sv-SE')}
-              </td>
+    <div className="bg-[#1a1d27] rounded-2xl border border-[#2e3347] shadow-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead>
+            <tr className="border-b border-[#2e3347]">
+              {columns.map(({ label, key }) => (
+                <th
+                  key={label}
+                  onClick={key ? () => toggleSort(key) : undefined}
+                  className={
+                    'px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap ' +
+                    (key ? 'cursor-pointer select-none hover:text-white transition-colors' : '')
+                  }
+                >
+                  {label}
+                  {key && <SortIcon active={sortKey === key} dir={sortDir} />}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sorted.map((r) => (
+              <tr
+                key={r.id}
+                className="border-b border-[#2e3347] last:border-0 hover:bg-[#242736]/60 transition-colors"
+              >
+                <td className="px-5 py-3.5 font-medium text-white max-w-[220px]">
+                  <span className="truncate block">{r.title}</span>
+                  <span className={'inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] ' + PRIORITY_STYLE[r.priority]}>
+                    {r.priority.charAt(0).toUpperCase() + r.priority.slice(1)}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="bg-[#242736] text-gray-300 px-2.5 py-1 rounded-lg text-xs">
+                    {r.category}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className={'px-2.5 py-1 rounded-full text-xs ' + STATUS_STYLE[r.status]}>
+                    {STATUS_LABEL[r.status]}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-gray-400 whitespace-nowrap">
+                  <span className="flex items-center gap-1">
+                    <MapPin size={12} className="text-gray-500" />
+                    {r.location}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-gray-400 whitespace-nowrap">
+                  {new Date(r.createdAt).toLocaleDateString('sv-SE')}
+                </td>
+                <td className="px-5 py-3.5 text-gray-300 whitespace-nowrap">
+                  {r.createdBy}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="px-5 py-3 border-t border-[#2e3347] text-xs text-gray-500">
+        {reports.length} {reports.length === 1 ? 'report' : 'reports'}
+      </div>
     </div>
   );
 }
