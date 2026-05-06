@@ -42,8 +42,9 @@ export function ReportFilters({
       {/* Date inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-xs text-gray-500 mb-1.5 block">From</label>
+          <label htmlFor="filter-from" className="text-xs text-gray-500 mb-1.5 block">From</label>
           <input
+            id="filter-from"
             type="date"
             value={dateRange.from}
             onChange={(e) => onChange({ ...dateRange, from: e.target.value })}
@@ -51,8 +52,9 @@ export function ReportFilters({
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 mb-1.5 block">To</label>
+          <label htmlFor="filter-to" className="text-xs text-gray-500 mb-1.5 block">To</label>
           <input
+            id="filter-to"
             type="date"
             value={dateRange.to}
             onChange={(e) => onChange({ ...dateRange, to: e.target.value })}
