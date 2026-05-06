@@ -9,7 +9,6 @@ import {
 import { mockReports } from '../../data/mockReports';
 import type { Report } from '../../types/report';
 
- localStorage mock // 
 const store: Record<string, string> = {};
 const localStorageMock = {
   getItem:  (key: string) => store[key] ?? null,
