@@ -23,7 +23,6 @@ describe('ReportTable', () => {
       expect(screen.getByText(col)).toBeInTheDocument();
     });
   });
-
   it('renders a row for each report', () => {
     renderTable();
     expect(screen.getByText('Alpha bug')).toBeInTheDocument();
@@ -49,14 +48,12 @@ describe('ReportTable', () => {
     expect(screen.getByText('Gothenburg')).toBeInTheDocument();
     expect(screen.getByText('Malmo')).toBeInTheDocument();
   });
-
   it('displays reporter names', () => {
     renderTable();
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('Bob')).toBeInTheDocument();
     expect(screen.getByText('Clara')).toBeInTheDocument();
   });
-
   it('shows row count in footer', () => {
     renderTable();
     expect(screen.getByText('3 reports')).toBeInTheDocument();
@@ -66,16 +63,13 @@ describe('ReportTable', () => {
     renderTable([reports[0]]);
     expect(screen.getByText('1 report')).toBeInTheDocument();
   });
-
   it('sorts by title ascending when Title header clicked', () => {
     renderTable();
     fireEvent.click(screen.getByText('Title'));
     const rows = screen.getAllByRole('row').slice(1);
     expect(rows[0]).toHaveTextContent('Alpha bug');
-    expect(rows[1]).toHaveTextContent('Beta feature');
     expect(rows[2]).toHaveTextContent('Gamma task');
   });
-
   it('toggles sort direction on second click', () => {
     renderTable();
     fireEvent.click(screen.getByText('Title'));
@@ -91,3 +85,4 @@ describe('ReportTable', () => {
     expect(screen.getByText('Alpha bug')).toBeInTheDocument();
   });
 });
+

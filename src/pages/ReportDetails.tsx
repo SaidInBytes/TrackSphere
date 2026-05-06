@@ -1,14 +1,26 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Tag, MapPin, User, Calendar,
-  RefreshCw, FileText, AlertTriangle, Loader2,
+  ArrowLeft,
+  Tag,
+  MapPin,
+  User,
+  Calendar,
+  RefreshCw,
+  FileText,
+  AlertTriangle,
 } from 'lucide-react';
-import { reportApi } from '../services/reportApi';
+import { getReports } from '../utils/reportStorage';
 import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
-import type { Report } from '../types/report';
 
-function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function DetailRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex items-start gap-3 py-3 border-b border-[#2e3347] last:border-0">
       <span className="text-gray-500 mt-0.5 shrink-0">{icon}</span>
