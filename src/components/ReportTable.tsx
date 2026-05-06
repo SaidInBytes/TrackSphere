@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
 import { StatusBadge, PriorityBadge } from './StatusBadge';
 import type { Report } from '../types/report';
-import { StatusBadge, PriorityBadge } from './StatusBadge';
 
 interface ReportTableProps {
   reports: Report[];
