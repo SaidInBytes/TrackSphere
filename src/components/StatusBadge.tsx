@@ -12,10 +12,7 @@ const STATUS_LABEL: Record<ReportStatus, string> = {
   closed:        'Closed',
 };
 
-interface StatusBadgeProps {
-  status: ReportStatus;
-  size?: 'sm' | 'md';
-}
+interface StatusBadgeProps { status: ReportStatus; size?: 'sm' | 'md'; }
 
 export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
   const padding = size === 'md' ? 'px-3 py-1 text-sm' : 'px-2.5 py-0.5 text-xs';
@@ -33,10 +30,7 @@ const PRIORITY_STYLE: Record<ReportPriority, string> = {
   critical: 'bg-red-600/20 text-red-400',
 };
 
-interface PriorityBadgeProps {
-  priority: ReportPriority;
-  size?: 'sm' | 'md';
-}
+interface PriorityBadgeProps { priority: ReportPriority; size?: 'sm' | 'md'; }
 
 export function PriorityBadge({ priority, size = 'sm' }: PriorityBadgeProps) {
   const padding = size === 'md' ? 'px-3 py-1 text-sm' : 'px-2.5 py-0.5 text-xs';

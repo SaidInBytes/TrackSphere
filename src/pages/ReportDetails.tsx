@@ -35,17 +35,35 @@ function DetailRow({
 export function ReportDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const report = getReports().find((r) => r.id === id);
+  const [report, setReport]   = useState<Report | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState<string | null>(null);
 
-  if (!report) {
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    reportApi.getReportById(id)
+      .then(setReport)
+      .catch((err: Error) => setError(err.message ?? 'Report not found'))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+        <Loader2 size={28} className="text-indigo-400 animate-spin" />
+      </div>
+    );
+  }
+
+  // Error / not-found state
+  if (error || !report) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle size={40} className="text-amber-400" />
         <h1 className="text-xl font-bold text-white">Report not found</h1>
-        <p className="text-gray-400 text-sm">
-          The report with ID{' '}
-          <span className="text-indigo-400 font-mono">{id}</span> does not exist.
-        </p>
+        <p className="text-gray-400 text-sm">{error ?? 'This report does not exist.'}</p>
         <button
           onClick={() => navigate('/')}
           className="mt-2 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 transition-colors text-white text-sm font-medium px-4 py-2.5 rounded-xl"
@@ -86,49 +104,33 @@ export function ReportDetails() {
           <div className="md:col-span-2 bg-[#1a1d27] rounded-2xl border border-[#2e3347] shadow-lg p-6">
             <div className="flex items-center gap-2 mb-4">
               <FileText size={15} className="text-indigo-400" />
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Description
-              </h2>
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</h2>
             </div>
             {report.description ? (
-              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                {report.description}
-              </p>
+              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{report.description}</p>
             ) : (
               <p className="text-gray-600 italic text-sm">No description provided.</p>
             )}
           </div>
 
           <div className="bg-[#1a1d27] rounded-2xl border border-[#2e3347] shadow-lg p-6">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              Details
-            </h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Details</h2>
             <DetailRow
               icon={<Tag size={14} />}
               label="Category"
-              value={
-                <span className="bg-[#242736] text-gray-300 px-2.5 py-0.5 rounded-lg text-xs">
-                  {report.category}
-                </span>
-              }
+              value={<span className="bg-[#242736] text-gray-300 px-2.5 py-0.5 rounded-lg text-xs">{report.category}</span>}
             />
-            <DetailRow icon={<MapPin size={14} />} label="Location" value={report.location} />
-            <DetailRow icon={<User size={14} />} label="Reported by" value={report.createdBy} />
+            <DetailRow icon={<MapPin size={14} />}  label="Location"    value={report.location} />
+            <DetailRow icon={<User size={14} />}    label="Reported by" value={report.createdBy} />
             <DetailRow
               icon={<Calendar size={14} />}
               label="Created"
-              value={new Date(report.createdAt).toLocaleString('sv-SE', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              })}
+              value={new Date(report.createdAt).toLocaleString('sv-SE', { dateStyle: 'medium', timeStyle: 'short' })}
             />
             <DetailRow
               icon={<RefreshCw size={14} />}
               label="Last updated"
-              value={new Date(report.updatedAt).toLocaleString('sv-SE', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              })}
+              value={new Date(report.updatedAt).toLocaleString('sv-SE', { dateStyle: 'medium', timeStyle: 'short' })}
             />
           </div>
         </div>
