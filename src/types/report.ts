@@ -10,8 +10,9 @@ export interface Report {
   priority: ReportPriority;
   createdAt: string; // ISO date string
   updatedAt: string;
-  createdBy: string;
+  createdBy: string; // reporter name
   category: string;
+  location: string;  // physical or logical location of the report
 }
 
 // Form payload when creating a new report (no id/timestamps — server assigns those)
@@ -22,18 +23,19 @@ export interface CreateReportPayload {
   priority: ReportPriority;
   category: string;
   createdBy: string;
+  location: string;
 }
 
-// Stats derived from a list of reports
-export interface ReportStats {
+// Stats derived from a list of reports — includes "today" count
+export interface DashboardStats {
   total: number;
   open: number;
   closed: number;
-  inProgress: number;
+  today: number;
 }
 
 // Date range filter state
 export interface DateRange {
-  from: string; // ISO date string (YYYY-MM-DD)
+  from: string;
   to: string;
 }
