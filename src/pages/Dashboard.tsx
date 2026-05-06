@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { LayoutDashboard, Bell, Settings } from 'lucide-react';
-import { mockReports } from '../data/mockReports';
+import { getReports, addReport } from '../utils/reportStorage';
 import { DashboardCards } from '../components/DashboardCards';
 import { ReportPieChart } from '../components/ReportPieChart';
 import { ReportFilters } from '../components/ReportFilters';
@@ -19,7 +19,8 @@ function isToday(isoString: string): boolean {
 }
 
 export function Dashboard() {
-  const [reports, setReports] = useState<Report[]>(mockReports);
+  // Load from localStorage on mount; falls back to mockReports on first visit
+  const [reports, setReports] = useState<Report[]>(() => getReports());
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' });
 
   const filtered = useMemo(() => {
@@ -48,7 +49,9 @@ export function Dashboard() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    setReports((prev) => [newReport, ...prev]);
+    // Persist to localStorage and update local state atomically
+    const updated = addReport(newReport);
+    setReports(updated);
   };
 
   return (
@@ -78,7 +81,7 @@ export function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-gray-400 text-sm mt-1">
-            Welcome  here's what's happening today.back 
+            Welcome back — here's what's happening today.
           </p>
         </div>
 
