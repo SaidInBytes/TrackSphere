@@ -30,7 +30,6 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: { name:
 }
 
 export function ReportPieChart({ stats }: ReportPieChartProps) {
- closed
   const inProgress = stats.total - stats.open - stats.closed;
 
   const data = [
