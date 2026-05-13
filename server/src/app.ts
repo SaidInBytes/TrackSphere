@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import reportRoutes from './routes/reportRoutes';
+import authRoutes from './routes/authRoutes';
+import { authMiddleware } from './middleware/auth';
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -13,10 +14,13 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes
-app.use('/api/reports', reportRoutes);
+// Public auth routes
+app.use('/api/auth', authRoutes);
 
-// 404 handler for unknown routes
+// Protected report routes
+app.use('/api/reports', authMiddleware, reportRoutes);
+
+// 404 handler
 app.use((_req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
