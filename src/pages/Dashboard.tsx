@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { LayoutDashboard, Bell, Settings, AlertCircle, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, Bell, Settings, AlertCircle, RefreshCw, LogOut } from 'lucide-react';
 import { reportApi } from '../services/reportApi';
 import { DashboardCards } from '../components/DashboardCards';
 import { ReportPieChart } from '../components/ReportPieChart';
 import { ReportFilters } from '../components/ReportFilters';
 import { ReportTable } from '../components/ReportTable';
 import { CreateReportForm } from '../components/CreateReportForm';
+import { useAuth } from '../context/AuthContext';
 import type { Report, DateRange, DashboardStats, CreateReportPayload } from '../types/report';
 
 function isToday(isoString: string): boolean {
@@ -19,6 +20,7 @@ function isToday(isoString: string): boolean {
 }
 
 export function Dashboard() {
+  const { user, logout } = useAuth();
   const [reports, setReports]     = useState<Report[]>([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
@@ -79,6 +81,15 @@ export function Dashboard() {
             </button>
             <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#242736] transition-colors">
               <Settings size={18} />
+            </button>
+            <div className="w-px h-6 bg-[#2e3347] mx-1" />
+            <span className="text-sm text-gray-400 hidden sm:block">{user?.name}</span>
+            <button
+              onClick={logout}
+              title="Sign out"
+              className="flex items-center gap-1.5 p-2 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            >
+              <LogOut size={17} />
             </button>
             <div className="w-px h-6 bg-[#2e3347] mx-1" />
             <CreateReportForm onSubmit={handleCreate} />
