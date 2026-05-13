@@ -10,10 +10,13 @@ import {
   FileText,
   AlertTriangle,
   Loader2,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { StatusBadge, PriorityBadge } from '../components/StatusBadge';
-import { getReportById } from '../services/reportApi';
-import type { Report } from '../types/report';
+import { EditReportModal } from '../components/EditReportModal';
+import { getReportById, updateReport, deleteReport } from '../services/reportApi';
+import type { Report, CreateReportPayload } from '../types/report';
 
 function DetailRow({
   icon,
@@ -38,9 +41,12 @@ function DetailRow({
 export function ReportDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [report, setReport]   = useState<Report | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [report, setReport]         = useState<Report | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState<string | null>(null);
+  const [showEdit, setShowEdit]     = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [deleting, setDeleting]     = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -51,7 +57,26 @@ export function ReportDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Loading state
+  const handleSave = async (payload: Partial<CreateReportPayload>) => {
+    if (!id) return;
+    const updated = await updateReport(id, payload);
+    setReport(updated);
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await deleteReport(id);
+      navigate('/');
+    } catch (err) {
+      setError((err as Error).message ?? 'Failed to delete report');
+      setShowConfirm(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
@@ -60,7 +85,6 @@ export function ReportDetails() {
     );
   }
 
-  // Error / not-found state
   if (error || !report) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-4 text-center px-4">
@@ -90,7 +114,25 @@ export function ReportDetails() {
             Back
           </button>
           <div className="w-px h-5 bg-[#2e3347]" />
-          <span className="text-sm text-gray-400 truncate">{report.title}</span>
+          <span className="text-sm text-gray-400 truncate flex-1">{report.title}</span>
+
+          {/* Action buttons */}
+          <button
+            onClick={() => setShowEdit(true)}
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-[#242736]"
+            aria-label="Edit report"
+          >
+            <Pencil size={15} />
+            Edit
+          </button>
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+            aria-label="Delete report"
+          >
+            <Trash2 size={15} />
+            Delete
+          </button>
         </div>
       </header>
 
@@ -140,6 +182,53 @@ export function ReportDetails() {
 
         <p className="text-xs text-gray-600 font-mono">ID: {report.id}</p>
       </main>
+
+      {/* Edit modal */}
+      {showEdit && (
+        <EditReportModal
+          report={report}
+          onSave={handleSave}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#1a1d27] rounded-2xl border border-[#2e3347] shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-500/10 p-2.5 rounded-xl">
+                <Trash2 size={20} className="text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-white font-semibold">Delete report?</h2>
+                <p className="text-gray-400 text-xs mt-0.5">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-300 bg-[#242736] rounded-xl px-4 py-3 truncate">
+              {report.title}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                disabled={deleting}
+                className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-60 transition-colors text-white text-sm font-medium px-5 py-2.5 rounded-xl"
+              >
+                {deleting && <Loader2 size={14} className="animate-spin" />}
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
