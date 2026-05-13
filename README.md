@@ -27,7 +27,7 @@ A modern, full-stack reporting system built with React, TypeScript, and Node.js.
 | Routing   | React Router v7                         |
 | Testing   | Vitest, React Testing Library           |
 | Backend   | Node.js, Express, TypeScript            |
-| Database  | PostgreSQL *(coming soon)*              |
+| Database  | PostgreSQL + `pg`                       |
 | CI/CD     | GitHub Actions                          |
 
 ## Project Structure
@@ -103,6 +103,8 @@ Create a `.env` file in `server/`:
 
 ```env
 PORT=3001
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres:password@localhost:5432/tracksphere
 ```
 
 ## API Endpoints
