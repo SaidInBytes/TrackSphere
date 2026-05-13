@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ReportDetails } from '../../pages/ReportDetails';
@@ -68,6 +68,26 @@ describe('ReportDetails', () => {
     renderAt('/reports/42');
     await waitFor(() => expect(screen.getByText('Back')).toBeInTheDocument());
   });
+  it('renders Edit button', async () => {
+    renderAt('/reports/42');
+    await waitFor(() => expect(screen.getByText('Edit')).toBeInTheDocument());
+  });
+  it('renders Delete button', async () => {
+    renderAt('/reports/42');
+    await waitFor(() => expect(screen.getByText('Delete')).toBeInTheDocument());
+  });
+  it('opens edit modal on Edit click', async () => {
+    renderAt('/reports/42');
+    await waitFor(() => screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Edit'));
+    expect(screen.getByText('Edit Report')).toBeInTheDocument();
+  });
+  it('opens delete confirmation on Delete click', async () => {
+    renderAt('/reports/42');
+    await waitFor(() => screen.getByText('Delete'));
+    fireEvent.click(screen.getByText('Delete'));
+    expect(screen.getByText('Delete report?')).toBeInTheDocument();
+  });
   it('shows not-found state for unknown id', async () => {
     vi.spyOn(reportApi, 'getReportById').mockRejectedValue(new Error('Not found'));
     renderAt('/reports/999');
@@ -81,3 +101,4 @@ describe('ReportDetails', () => {
     await waitFor(() => expect(screen.getByText('Not found')).toBeInTheDocument());
   });
 });
+
